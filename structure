@@ -1,0 +1,59 @@
+hashpact/
+├── lib/
+│   ├── main.dart
+│   ├── app.dart                        # GoRouter + ProviderScope
+│   │
+│   ├── core/
+│   │   ├── models/
+│   │   │   ├── identity.dart           # IdentityState, AuthType enum
+│   │   │   ├── swap_offer.dart         # SwapOffer, SwapState enum
+│   │   │   ├── contact.dart
+│   │   │   ├── chat_message.dart
+│   │   │   ├── token_info.dart
+│   │   │   └── walrus_receipt.dart     # NEW — blobId + swap metadata
+│   │   │
+│   │   ├── crypto/
+│   │   │   ├── key_manager.dart        # BIP39 + NIP-06 + SUI derivation
+│   │   │   └── htlc_crypto.dart        # SHA256 + Seal wrapping
+│   │   │
+│   │   ├── services/
+│   │   │   ├── nostr_dm_service.dart
+│   │   │   ├── swap_engine.dart
+│   │   │   ├── sui_service.dart        # PTBs, balance, lock/claim
+│   │   │   ├── btc_service.dart        # Blockstream API
+│   │   │   ├── seal_service.dart       # wrap/unwrap HTLC secret
+│   │   │   ├── walrus_service.dart     # store/retrieve swap receipts
+│   │   │   └── zklogin_service.dart    # OAuth → ZK proof → SUI addr
+│   │   │
+│   │   ├── providers/
+│   │   │   ├── identity_provider.dart
+│   │   │   ├── contacts_provider.dart
+│   │   │   ├── chat_provider.dart
+│   │   │   ├── swap_provider.dart
+│   │   │   ├── balance_provider.dart
+│   │   │   └── walrus_provider.dart
+│   │   │
+│   │   └── storage/
+│   │       └── local_storage.dart      # SharedPrefs + SecureStorage wrappers
+│   │
+│   └── ui/
+│       ├── screens/
+│       │   ├── onboarding/
+│       │   │   ├── welcome_screen.dart
+│       │   │   ├── seed_generate_screen.dart
+│       │   │   ├── seed_verify_screen.dart
+│       │   │   ├── pin_setup_screen.dart
+│       │   │   └── zklogin_screen.dart  # NEW
+│       │   ├── dashboard_screen.dart
+│       │   ├── contacts_screen.dart
+│       │   ├── chat_screen.dart
+│       │   ├── profile_screen.dart
+│       │   └── history_screen.dart
+│       │
+│       └── widgets/
+│           ├── swap_bubble.dart
+│           ├── swap_request_sheet.dart
+│           └── token_card.dart
+│
+├── pubspec.yaml
+└── test/
