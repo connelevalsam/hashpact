@@ -6,7 +6,7 @@
 import 'package:flutter/material.dart';
 
 class ChatScreen extends StatelessWidget {
-  const ChatScreen({super.key});
+  const ChatScreen({super.key, required String peerPubKey});
 
   @override
   Widget build(BuildContext context) {

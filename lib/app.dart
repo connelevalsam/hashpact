@@ -6,28 +6,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hashpact/presentation/screens/intro_screen.dart';
 
 import 'core/providers/identity_provider.dart';
+import 'core/util/hashpact_theme.dart';
 import 'presentation/screens/auth/pin_setup_screen.dart';
 import 'presentation/screens/auth/seed_generate_screen.dart';
 import 'presentation/screens/auth/seed_verify_screen.dart';
-import 'presentation/screens/auth/welcome_screen.dart';
 import 'presentation/screens/dashboard/chat/chat_screen.dart';
 import 'presentation/screens/dashboard/chat/contacts_screen.dart';
 import 'presentation/screens/dashboard/dashboard_screen.dart';
 import 'presentation/screens/dashboard/profile/history_screen.dart';
 import 'presentation/screens/dashboard/profile/profile_screen.dart';
+import 'presentation/screens/welcome_screen.dart';
 
 // ── Route paths ─────────────────────────────────────────────────────────────
 
 abstract class AppRoutes {
-  static const welcome = '/welcome';
+  static const welcome = '/';
   static const seedGenerate = '/seed/generate';
   static const seedVerify = '/seed/verify';
   static const pinSetup = '/pin/setup';
   static const zkLogin = '/zklogin';
   static const pinLock = '/pin/lock';
-  static const dashboard = '/';
+  static const dashboard = '/dashboard';
+  static const onboarding = '/onboarding';
   static const contacts = '/contacts';
   static const chat = '/chat/:pubkey';
   static const profile = '/profile';
@@ -40,7 +43,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   final identityAsync = ref.watch(identityProvider);
 
   return GoRouter(
-    initialLocation: AppRoutes.dashboard,
+    initialLocation: AppRoutes.welcome,
     redirect: (context, state) {
       // Still loading — don't redirect yet
       if (identityAsync.isLoading) return null;
@@ -48,6 +51,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       final identity = identityAsync.value;
       final onAuthRoute =
           state.matchedLocation.startsWith('/welcome') ||
+          state.matchedLocation.startsWith('/onboarding') ||
           state.matchedLocation.startsWith('/seed') ||
           state.matchedLocation.startsWith('/zklogin') ||
           state.matchedLocation.startsWith('/pin/setup');
@@ -66,6 +70,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.welcome,
         builder: (_, __) => const WelcomeScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.onboarding,
+        builder: (_, __) => const IntroScreen(),
       ),
       GoRoute(
         path: AppRoutes.seedGenerate,
@@ -121,6 +129,15 @@ class HashPact extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Container();
+    final router = ref.watch(routerProvider);
+
+    return MaterialApp.router(
+      title: 'Hashpact',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.dark(),
+      darkTheme: AppTheme.dark(),
+      themeMode: ThemeMode.dark,
+      routerConfig: router,
+    );
   }
 }
