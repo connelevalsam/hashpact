@@ -6,6 +6,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hashpact/presentation/screens/auth/welcome_screen.dart';
+import 'package:hashpact/presentation/screens/auth/zklogin_screen.dart';
 import 'package:hashpact/presentation/screens/intro_screen.dart';
 
 import 'core/providers/identity_provider.dart';
@@ -18,12 +20,13 @@ import 'presentation/screens/dashboard/chat/contacts_screen.dart';
 import 'presentation/screens/dashboard/dashboard_screen.dart';
 import 'presentation/screens/dashboard/profile/history_screen.dart';
 import 'presentation/screens/dashboard/profile/profile_screen.dart';
-import 'presentation/screens/welcome_screen.dart';
+import 'presentation/screens/splash_screen.dart';
 
 // ── Route paths ─────────────────────────────────────────────────────────────
 
 abstract class AppRoutes {
-  static const welcome = '/';
+  static const splash = '/';
+  static const welcome = '/welcome';
   static const seedGenerate = '/seed/generate';
   static const seedVerify = '/seed/verify';
   static const pinSetup = '/pin/setup';
@@ -43,15 +46,16 @@ final routerProvider = Provider<GoRouter>((ref) {
   final identityAsync = ref.watch(identityProvider);
 
   return GoRouter(
-    initialLocation: AppRoutes.welcome,
+    initialLocation: AppRoutes.splash,
     redirect: (context, state) {
       // Still loading — don't redirect yet
       if (identityAsync.isLoading) return null;
 
       final identity = identityAsync.value;
       final onAuthRoute =
-          state.matchedLocation.startsWith('/welcome') ||
+          state.matchedLocation == AppRoutes.splash ||
           state.matchedLocation.startsWith('/onboarding') ||
+          state.matchedLocation.startsWith('/welcome') ||
           state.matchedLocation.startsWith('/seed') ||
           state.matchedLocation.startsWith('/zklogin') ||
           state.matchedLocation.startsWith('/pin/setup');
@@ -60,20 +64,21 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (identity == null &&
           !onAuthRoute &&
           state.matchedLocation != AppRoutes.pinLock) {
-        return AppRoutes.welcome;
+        return AppRoutes.splash;
       }
 
       return null;
     },
     routes: [
       // ── Onboarding ──────────────────────────────────────────────
-      GoRoute(
-        path: AppRoutes.welcome,
-        builder: (_, __) => const WelcomeScreen(),
-      ),
+      GoRoute(path: AppRoutes.splash, builder: (_, __) => const SplashScreen()),
       GoRoute(
         path: AppRoutes.onboarding,
         builder: (_, __) => const IntroScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.welcome,
+        builder: (_, __) => const WelcomeScreen(),
       ),
       GoRoute(
         path: AppRoutes.seedGenerate,
@@ -87,14 +92,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.pinSetup,
         builder: (_, __) => const PinSetupScreen(),
       ),
-      /*GoRoute(
+      GoRoute(
         path: AppRoutes.zkLogin,
-        builder: (_, __) => const ZkLoginScreen(),
+        builder: (_, __) => const ZkloginScreen(),
       ),
       GoRoute(
         path: AppRoutes.pinLock,
-        builder: (_, __) => const PinLockScreen(),
-      ),*/
+        builder: (_, __) => const PinSetupScreen(),
+      ),
 
       // ── Main app ────────────────────────────────────────────────
       GoRoute(

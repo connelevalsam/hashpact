@@ -14,14 +14,14 @@ import '../../app.dart';
 import '../../core/providers/identity_provider.dart';
 import '../../core/util/hashpact_theme.dart';
 
-class WelcomeScreen extends ConsumerStatefulWidget {
-  const WelcomeScreen({super.key});
+class SplashScreen extends ConsumerStatefulWidget {
+  const SplashScreen({super.key});
 
   @override
   ConsumerState createState() => _WelcomeScreenState();
 }
 
-class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
+class _WelcomeScreenState extends ConsumerState<SplashScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _waveController;
   bool _hasNavigated = false;

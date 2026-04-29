@@ -23,7 +23,7 @@ abstract class AppColors {
   static const textPrimary = Color(
     0xFFE6EDF3,
   ); // main text — not pure white (easier on eyes)
-  static const textSecondary = Color(0xFF8B949E); // labels, hints
+  static const textSecondary = Color(0xFFC2CDDA); // labels, hints
   static const textMuted = Color(0xFF484F58); // placeholder, disabled
 
   // ── Semantic ─────────────────────────────────────────────
