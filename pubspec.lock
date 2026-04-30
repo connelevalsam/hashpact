@@ -872,6 +872,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.5.0"
+  otp_numpad:
+    dependency: "direct main"
+    description:
+      name: otp_numpad
+      sha256: "33742e71a2f63400590c14fb2e004a9106b753c7cc821275933ad0269b530036"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.1"
   package_config:
     dependency: transitive
     description:

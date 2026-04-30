@@ -7,6 +7,7 @@
 
 // ── Providers ────────────────────────────────────────────────────────────────
 
+import 'package:bip39/bip39.dart' as bip39;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/identity.dart';
@@ -22,9 +23,25 @@ final identityProvider =
 // ── Notifier ─────────────────────────────────────────────────────────────────
 
 class IdentityNotifier extends AsyncNotifier<IdentityState?> {
+  String? _pendingMnemonic;
+
   @override
   Future<IdentityState?> build() async {
     // On cold start: check if we already have keys stored
     return null;
+  }
+
+  Future<String> generateNewMnemonic() async {
+    // bip39 generates 12 random words from the BIP39 word list
+    // We import the package directly here in the provider
+    // The actual derivation happens later — for now we just generate and return
+    final mnemonic = bip39.generateMnemonic();
+    return mnemonic;
+  }
+
+  String? get pendingMnemonic => _pendingMnemonic;
+
+  void clearPendingMnemonic() {
+    _pendingMnemonic = null;
   }
 }
