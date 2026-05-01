@@ -38,12 +38,14 @@ class StatusBannerWidget extends StatelessWidget {
             size: 18,
           ),
           const SizedBox(width: AppSpacing.sm),
-          Text(
-            correct
-                ? 'Perfect. Your phrase is confirmed.'
-                : 'Some words are wrong. Tap them to remove and try again.',
-            style: AppTextStyles.bodySmall.copyWith(
-              color: correct ? AppColors.success : AppColors.danger,
+          Expanded(
+            child: Text(
+              correct
+                  ? 'Perfect. Your phrase is confirmed.'
+                  : 'Some words are wrong. Tap them to remove and try again.',
+              style: AppTextStyles.bodySmall.copyWith(
+                color: correct ? AppColors.success : AppColors.danger,
+              ),
             ),
           ),
         ],

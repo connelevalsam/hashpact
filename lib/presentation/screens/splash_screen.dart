@@ -12,6 +12,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app.dart';
 import '../../core/providers/identity_provider.dart';
+import '../../core/storage/local_storage.dart';
 import '../../core/util/hashpact_theme.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -35,32 +36,71 @@ class _WelcomeScreenState extends ConsumerState<SplashScreen>
       duration: const Duration(seconds: 6),
     )..repeat();
 
-    _beginSplashSequence();
+    Future.delayed(const Duration(milliseconds: 2800), () {
+      if (mounted) _navigate();
+    });
   }
 
   Future<void> _beginSplashSequence() async {
-    // Minimum display time — let the animation breathe
-    await Future.delayed(const Duration(milliseconds: 2500));
+    // Run both simultaneously — animation timer AND identity check
+    await Future.wait([
+      Future.delayed(const Duration(milliseconds: 2500)), // minimum display
+      ref.read(identityProvider.future), // wait for storage restore
+    ]);
 
-    // Now wait for identity to resolve, but bail if unmounted
-    while (mounted && ref.read(identityProvider).isLoading) {
-      await Future.delayed(const Duration(milliseconds: 100));
-    }
-
-    // Final mounted check before any navigation
-    if (!mounted || _hasNavigated) return;
-    _navigate();
+    Future.delayed(const Duration(milliseconds: 2800), () {
+      if (mounted) _navigate();
+    });
   }
 
-  void _navigate() {
+  /*Future<void> _navigate() async {
+    if (!mounted || _hasNavigated) return;
     _hasNavigated = true;
+
     final identity = ref.read(identityProvider).value;
+
+    if (identity != null) {
+      // Returning user — skip everything, go to dashboard
+      // Later: go to PIN lock instead
+      context.go(AppRoutes.dashboard);
+      return;
+    }
+
+    // Check if they've seen onboarding before
+    final hasSeenOnboarding = await PrefStore.instance.readHasSeenOnboarding();
+
+    if (hasSeenOnboarding) {
+      // They set up before but wiped — skip onboarding, go to welcome
+      context.go(AppRoutes.welcome);
+    } else {
+      // Truly first launch
+      context.go(AppRoutes.onboarding);
+    }
+  }*/
+
+  void _navigate() {
+    if (_hasNavigated) return;
+    _hasNavigated = true;
+
+    final identity = ref.read(identityProvider).value;
+
     if (identity != null) {
       context.go(AppRoutes.dashboard);
+      return;
+    }
+
+    _checkOnboarding();
+  }
+
+  Future<void> _checkOnboarding() async {
+    final hasSeenOnboarding = await PrefStore.instance.readHasSeenOnboarding();
+    if (!mounted) return;
+
+    if (hasSeenOnboarding) {
+      context.go(AppRoutes.welcome);
     } else {
       context.go(AppRoutes.onboarding);
     }
-    debugPrint('Navigating — identity: $identity');
   }
 
   @override

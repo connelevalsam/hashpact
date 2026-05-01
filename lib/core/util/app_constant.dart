@@ -31,6 +31,9 @@ abstract class AppConstants {
   static const keyPrivacyMode = 'hp_privacy_mode';
   static const keyZkMaxEpoch = 'hp_zk_max_epoch';
 
+  static const keySuiPriv = 'hp_sui_priv';
+  static const keyHasSeenOnboarding = 'hp_has_seen_onboarding';
+
   static String keyChatWith(String pubkey) => 'hp_chat_$pubkey';
   static String keyWalrusReceipt(String swapId) => 'hp_walrus_$swapId';
 

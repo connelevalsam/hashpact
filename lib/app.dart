@@ -43,27 +43,36 @@ abstract class AppRoutes {
 // ── Router provider ─────────────────────────────────────────────────────────
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final identityAsync = ref.watch(identityProvider);
+  final notifier = ref.read(identityProvider.notifier);
 
   return GoRouter(
     initialLocation: AppRoutes.splash,
+    refreshListenable: _IdentityListenable(ref),
     redirect: (context, state) {
+      final identityAsync = ref.read(identityProvider);
       // Still loading — don't redirect yet
       if (identityAsync.isLoading) return null;
 
       final identity = identityAsync.value;
-      final onAuthRoute =
-          state.matchedLocation == AppRoutes.splash ||
-          state.matchedLocation.startsWith('/onboarding') ||
-          state.matchedLocation.startsWith('/welcome') ||
-          state.matchedLocation.startsWith('/seed') ||
-          state.matchedLocation.startsWith('/zklogin') ||
-          state.matchedLocation.startsWith('/pin/setup');
+      final local = state.matchedLocation;
 
-      // No account at all → onboarding
-      if (identity == null &&
-          !onAuthRoute &&
-          state.matchedLocation != AppRoutes.pinLock) {
+      if (local == AppRoutes.splash) return null;
+
+      final isPublicRoute =
+          local == AppRoutes.splash ||
+          local.startsWith('/onboarding') ||
+          local.startsWith('/welcome') ||
+          local.startsWith('/seed') ||
+          local.startsWith('/zklogin') ||
+          local.startsWith('/pin');
+
+      // Has account + trying to access public route → send home
+      if (identity != null && isPublicRoute && local != AppRoutes.pinLock) {
+        return AppRoutes.dashboard;
+      }
+
+      // No account + trying to access protected route → send to splash
+      if (identity == null && !isPublicRoute) {
         return AppRoutes.splash;
       }
 
@@ -126,6 +135,12 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
+class _IdentityListenable extends ChangeNotifier {
+  _IdentityListenable(Ref ref) {
+    ref.listen(identityProvider, (_, __) => notifyListeners());
+  }
+}
 
 // ── Root app widget ─────────────────────────────────────────────────────────
 

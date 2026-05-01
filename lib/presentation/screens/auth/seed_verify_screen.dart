@@ -67,13 +67,23 @@ class _SeedVerifyScreenState extends ConsumerState<SeedVerifyScreen> {
     return _testPositions.every((pos) => _answers[pos] == _allWords[pos]);
   }
 
+  int numTaps = 5;
+
   void _tapWord(String word) {
     // Find the first unfilled test position
     final nextEmpty = _testPositions.firstWhere(
       (pos) => !_answers.containsKey(pos),
       orElse: () => -1,
     );
-    if (nextEmpty == -1) return;
+    if (nextEmpty == -1) {
+      numTaps--;
+      if (numTaps == 0) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          context.go(AppRoutes.seedGenerate);
+        });
+        return;
+      }
+    }
 
     setState(() => _answers[nextEmpty] = word);
   }
@@ -84,8 +94,8 @@ class _SeedVerifyScreenState extends ConsumerState<SeedVerifyScreen> {
 
   void _onContinue() {
     if (!_allCorrect) return;
-    ref.read(identityProvider.notifier).clearPendingMnemonic();
-    context.go(AppRoutes.pinSetup);
+
+    context.push(AppRoutes.pinSetup);
   }
 
   @override

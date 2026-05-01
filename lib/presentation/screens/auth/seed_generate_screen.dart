@@ -127,7 +127,7 @@ class _SeedGenerateScreenState extends ConsumerState<SeedGenerateScreen> {
                     const SizedBox(height: AppSpacing.md),
                     FilledButton(
                       onPressed: _revealed
-                          ? () => context.go(AppRoutes.seedVerify)
+                          ? () => context.push(AppRoutes.seedVerify)
                           : null,
                       child: const Text("I've written it down"),
                     ),

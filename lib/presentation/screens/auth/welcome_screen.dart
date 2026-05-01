@@ -80,7 +80,7 @@ class WelcomeScreen extends StatelessWidget {
             const Spacer(),
 
             FilledButton(
-                  onPressed: () => context.go(AppRoutes.seedGenerate),
+                  onPressed: () => context.push(AppRoutes.seedGenerate),
                   child: const Text('Create with seed phrase'),
                 )
                 .animate()
@@ -96,7 +96,7 @@ class WelcomeScreen extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
 
             OutlinedButton(
-                  onPressed: () => context.go(AppRoutes.zkLogin),
+                  onPressed: () => context.push(AppRoutes.zkLogin),
                   child: const Text('Continue with Google / Apple'),
                 )
                 .animate()
