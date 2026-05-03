@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hashpact/presentation/screens/auth/widgets/pin_dots_widget.dart';
 import 'package:hashpact/presentation/widgets/num_pad_widget.dart';
 import 'package:hugeicons/hugeicons.dart';
 
@@ -85,7 +86,7 @@ class _PinSetupScreenState extends ConsumerState<PinSetupScreen> {
       final pinString = _pin.join();
       await ref.read(identityProvider.notifier).setupPin(pinString);
       if (!mounted) return;
-      context.go(AppRoutes.dashboard);
+      context.go(AppRoutes.home);
     } catch (e) {
       debugPrint('PIN ERROR: $e');
       if (!mounted) return;
@@ -152,10 +153,11 @@ class _PinSetupScreenState extends ConsumerState<PinSetupScreen> {
                     const SizedBox(height: AppSpacing.xxl),
 
                     // ── PIN dots ───────────────────────────────
-                    _pinDots(
-                          _activePin.length,
-                          _pinLength,
-                          _errorMessage != null,
+                    PinDotsWidget(
+                          loading: _loading,
+                          hasError: _errorMessage != null,
+                          filled: _activePin.length,
+                          total: _pinLength,
                         )
                         .animate(key: ValueKey(_confirming))
                         .fadeIn(duration: 300.ms)
@@ -199,37 +201,6 @@ class _PinSetupScreenState extends ConsumerState<PinSetupScreen> {
                 ),
               ),
       ),
-    );
-  }
-
-  Widget _pinDots(int filled, int total, bool hasError) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(total, (i) {
-        final isFilled = i < filled;
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          margin: const EdgeInsets.symmetric(horizontal: 8),
-          width: 16,
-          height: 16,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isFilled
-                ? hasError
-                      ? AppColors.danger
-                      : AppColors.primary
-                : Colors.transparent,
-            border: Border.all(
-              color: isFilled
-                  ? hasError
-                        ? AppColors.danger
-                        : AppColors.primary
-                  : AppColors.border,
-              width: 2,
-            ),
-          ),
-        );
-      }),
     );
   }
 }

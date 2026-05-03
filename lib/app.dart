@@ -12,12 +12,14 @@ import 'package:hashpact/presentation/screens/intro_screen.dart';
 
 import 'core/providers/identity_provider.dart';
 import 'core/util/hashpact_theme.dart';
+import 'presentation/screens/auth/pin_lock_screen.dart';
 import 'presentation/screens/auth/pin_setup_screen.dart';
 import 'presentation/screens/auth/seed_generate_screen.dart';
 import 'presentation/screens/auth/seed_verify_screen.dart';
 import 'presentation/screens/dashboard/chat/chat_screen.dart';
 import 'presentation/screens/dashboard/chat/contacts_screen.dart';
-import 'presentation/screens/dashboard/dashboard_screen.dart';
+import 'presentation/screens/dashboard/dashboard.dart';
+import 'presentation/screens/dashboard/home/home_screen.dart';
 import 'presentation/screens/dashboard/profile/history_screen.dart';
 import 'presentation/screens/dashboard/profile/profile_screen.dart';
 import 'presentation/screens/splash_screen.dart';
@@ -32,12 +34,16 @@ abstract class AppRoutes {
   static const pinSetup = '/pin/setup';
   static const zkLogin = '/zklogin';
   static const pinLock = '/pin/lock';
-  static const dashboard = '/dashboard';
   static const onboarding = '/onboarding';
-  static const contacts = '/contacts';
-  static const chat = '/chat/:pubkey';
-  static const profile = '/profile';
-  static const history = '/history';
+
+  static const home = '/dashboard';
+  static const contacts = '/dashboard/contacts';
+  static const chat = '/dashboard/contacts/:pubkey';
+  static const profile = '/dashboard/profile';
+  static const history = '/dashboard/profile/history';
+
+  // chatWith helper
+  static String chatWith(String pubkey) => '/dashboard/contacts/$pubkey';
 }
 
 // ── Router provider ─────────────────────────────────────────────────────────
@@ -68,7 +74,7 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       // Has account + trying to access public route → send home
       if (identity != null && isPublicRoute && local != AppRoutes.pinLock) {
-        return AppRoutes.dashboard;
+        return AppRoutes.home;
       }
 
       // No account + trying to access protected route → send to splash
@@ -102,6 +108,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, __) => const PinSetupScreen(),
       ),
       GoRoute(
+        path: AppRoutes.pinLock,
+        builder: (_, __) => const PinLockScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.zkLogin,
         builder: (_, __) => const ZkloginScreen(),
       ),
@@ -111,26 +121,32 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
 
       // ── Main app ────────────────────────────────────────────────
-      GoRoute(
-        path: AppRoutes.dashboard,
-        builder: (_, __) => const DashboardScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.contacts,
-        builder: (_, __) => const ContactsScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.chat,
-        builder: (_, state) =>
-            ChatScreen(peerPubKey: state.pathParameters['pubkey']!),
-      ),
-      GoRoute(
-        path: AppRoutes.profile,
-        builder: (_, __) => const ProfileScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.history,
-        builder: (_, __) => const HistoryScreen(),
+      ShellRoute(
+        builder: (context, state, child) => Dashboard(child: child),
+        routes: [
+          GoRoute(path: AppRoutes.home, builder: (_, __) => const HomeScreen()),
+          GoRoute(
+            path: AppRoutes.contacts,
+            builder: (_, __) => const ContactsScreen(),
+            routes: [
+              GoRoute(
+                path: ':pubkey',
+                builder: (_, state) =>
+                    ChatScreen(peerPubKey: state.pathParameters['pubkey']!),
+              ),
+            ],
+          ),
+          GoRoute(
+            path: AppRoutes.profile,
+            builder: (_, __) => const ProfileScreen(),
+            routes: [
+              GoRoute(
+                path: 'history',
+                builder: (_, __) => const HistoryScreen(),
+              ),
+            ],
+          ),
+        ],
       ),
     ],
   );

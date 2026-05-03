@@ -85,7 +85,7 @@ class _WelcomeScreenState extends ConsumerState<SplashScreen>
     final identity = ref.read(identityProvider).value;
 
     if (identity != null) {
-      context.go(AppRoutes.dashboard);
+      context.go(AppRoutes.pinLock);
       return;
     }
 

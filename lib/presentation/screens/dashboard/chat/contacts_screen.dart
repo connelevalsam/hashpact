@@ -4,12 +4,137 @@
 */
 
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:hashpact/presentation/screens/dashboard/chat/widgets/add_contact_sheet.dart';
+import 'package:hashpact/presentation/screens/dashboard/chat/widgets/contact_tile_widget.dart';
+import 'package:hashpact/presentation/screens/dashboard/chat/widgets/empty_state_widget.dart';
+import 'package:hugeicons/hugeicons.dart';
 
-class ContactsScreen extends StatelessWidget {
+import '../../../../app.dart';
+import '../../../../core/models/contact.dart';
+import '../../../../core/util/hashpact_theme.dart';
+
+class ContactsScreen extends ConsumerWidget {
   const ContactsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const Placeholder();
+  Widget build(BuildContext context, WidgetRef ref) {
+    // final contactsAsync = ref.watch(contactsProvider);
+    String _search = '';
+    List<DummyContact> _contacts = dummyContacts.where((contact) {
+      return contact.name.toLowerCase().contains(_search.toLowerCase());
+    }).toList();
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Header ──────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'MESSAGES',
+                          style: AppTextStyles.label.copyWith(
+                            color: AppColors.textMuted,
+                            letterSpacing: 1.4,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text('Contacts', style: AppTextStyles.heading2),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => _showAddContact(context, ref),
+                    icon: const HugeIcon(
+                      icon: HugeIcons.strokeRoundedUserAdd01,
+                      color: AppColors.textPrimary,
+                      size: 24,
+                    ),
+                  ),
+                ],
+              ),
+            ).animate().fadeIn(duration: 400.ms),
+
+            const SizedBox(height: AppSpacing.md),
+
+            // ── Search bar ──────────────────────────────────────
+            Padding(
+              padding: AppSpacing.pagePadding,
+              child: TextField(
+                style: AppTextStyles.body,
+                decoration: InputDecoration(
+                  hintText: 'Search contacts...',
+                  prefixIcon: const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: HugeIcon(
+                      icon: HugeIcons.strokeRoundedSearch01,
+                      color: AppColors.textMuted,
+                      size: 20,
+                    ),
+                  ),
+                ),
+                onChanged: (val) {
+                  // TODO: filter contacts list
+                  _search = val;
+                },
+              ),
+            ).animate().fadeIn(delay: 100.ms, duration: 400.ms),
+
+            const SizedBox(height: AppSpacing.md),
+
+            // ── List ──────────────────────────────────────────
+            Expanded(
+              child: _contacts.isEmpty
+                  ? EmptyStateWidget(
+                      onAddTap: () => _showAddContact(context, ref),
+                    )
+                  : ListView.builder(
+                      padding: AppSpacing.pagePadding,
+                      itemCount: _contacts.length,
+                      itemBuilder: (_, i) {
+                        final c = _contacts[i];
+                        return ContactTileWidget(
+                              contact: c,
+                              onTap: () =>
+                                  context.push(AppRoutes.chatWith(c.pubKey)),
+                            )
+                            .animate()
+                            .fadeIn(
+                              delay: Duration(milliseconds: 60 * i),
+                              duration: 300.ms,
+                            )
+                            .slideX(
+                              begin: 0.05,
+                              end: 0,
+                              delay: Duration(milliseconds: 60 * i),
+                              duration: 300.ms,
+                            );
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showAddContact(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => AddContactSheet(/*ref: ref*/),
+    );
   }
 }
