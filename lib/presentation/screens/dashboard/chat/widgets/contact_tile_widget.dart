@@ -17,11 +17,12 @@ class ContactTileWidget extends StatelessWidget {
     required this.onTap,
   });
 
-  final DummyContact contact;
+  final Contact contact;
+  // final DummyContact contact;
   final VoidCallback onTap;
 
   String get _truncatedKey {
-    final k = contact.pubKey;
+    final k = contact.nostrPubKeyHex;
     return '${k.substring(0, 8)}...${k.substring(k.length - 8)}';
   }
 
@@ -48,14 +49,14 @@ class ContactTileWidget extends StatelessWidget {
           ),
           child: Row(
             children: [
-              AvatarWidget(name: contact.name),
+              AvatarWidget(name: contact.displayName),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      contact.name,
+                      contact.displayName,
                       style: AppTextStyles.body.copyWith(
                         fontWeight: FontWeight.w600,
                       ),

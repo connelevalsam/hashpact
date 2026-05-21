@@ -5,6 +5,8 @@
 
 //contact
 
+import 'package:equatable/equatable.dart';
+
 class DummyContact {
   const DummyContact({
     required this.name,
@@ -39,3 +41,58 @@ final dummyContacts = [
     lastMessageAt: DateTime.now().subtract(const Duration(days: 1)),
   ),
 ];
+
+// Real Data
+
+class Contact extends Equatable {
+  const Contact({
+    required this.displayName,
+    required this.nostrPubKeyHex,
+    this.lastMessage,
+    this.lastMessageAt,
+  });
+
+  final String displayName;
+  final String nostrPubKeyHex;
+  final String? lastMessage;
+  final DateTime? lastMessageAt;
+
+  Contact copyWith({
+    String? displayName,
+    String? nostrPubKeyHex,
+    String? lastMessage,
+    DateTime? lastMessageAt,
+  }) {
+    return Contact(
+      displayName: displayName ?? this.displayName,
+      nostrPubKeyHex: nostrPubKeyHex ?? this.nostrPubKeyHex,
+      lastMessage: lastMessage ?? this.lastMessage,
+      lastMessageAt: lastMessageAt ?? this.lastMessageAt,
+    );
+  }
+
+  // JSON — stored in SharedPreferences
+  Map<String, dynamic> toJson() => {
+    'displayName': displayName,
+    'nostrPubKeyHex': nostrPubKeyHex,
+    'lastMessage': lastMessage,
+    'lastMessageAt': lastMessageAt?.toIso8601String(),
+  };
+
+  factory Contact.fromJson(Map<String, dynamic> json) => Contact(
+    displayName: json['displayName'] as String,
+    nostrPubKeyHex: json['nostrPubKeyHex'] as String,
+    lastMessage: json['lastMessage'] as String?,
+    lastMessageAt: json['lastMessageAt'] != null
+        ? DateTime.fromMillisecondsSinceEpoch(json['lastMessageAt'] as int)
+        : null,
+  );
+
+  @override
+  List<Object?> get props => [
+    displayName,
+    nostrPubKeyHex,
+    lastMessage,
+    lastMessageAt,
+  ];
+}

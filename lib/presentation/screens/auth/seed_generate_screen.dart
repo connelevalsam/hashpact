@@ -12,8 +12,8 @@ import 'package:hashpact/presentation/screens/auth/widgets/warning_banner_widget
 import 'package:hugeicons/hugeicons.dart';
 
 import '../../../app.dart';
-import '../../../core/providers/identity_provider.dart';
 import '../../../core/util/hashpact_theme.dart';
+import '../../providers/identity_provider.dart';
 import 'widgets/word_grid_widget.dart';
 
 class SeedGenerateScreen extends ConsumerStatefulWidget {

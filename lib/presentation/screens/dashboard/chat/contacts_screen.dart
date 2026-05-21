@@ -13,19 +13,19 @@ import 'package:hashpact/presentation/screens/dashboard/chat/widgets/empty_state
 import 'package:hugeicons/hugeicons.dart';
 
 import '../../../../app.dart';
-import '../../../../core/models/contact.dart';
 import '../../../../core/util/hashpact_theme.dart';
+import '../../../providers/contacts_provider.dart';
 
 class ContactsScreen extends ConsumerWidget {
   const ContactsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // final contactsAsync = ref.watch(contactsProvider);
+    final _contacts = ref.watch(contactsProvider);
     String _search = '';
-    List<DummyContact> _contacts = dummyContacts.where((contact) {
+    /*List<DummyContact> _contacts = dummyContacts.where((contact) {
       return contact.name.toLowerCase().contains(_search.toLowerCase());
-    }).toList();
+    }).toList();*/
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -95,19 +95,22 @@ class ContactsScreen extends ConsumerWidget {
 
             // ── List ──────────────────────────────────────────
             Expanded(
-              child: _contacts.isEmpty
+              child: _contacts.isLoading
+                  ? CircularProgressIndicator()
+                  : _contacts.value == null
                   ? EmptyStateWidget(
                       onAddTap: () => _showAddContact(context, ref),
                     )
                   : ListView.builder(
                       padding: AppSpacing.pagePadding,
-                      itemCount: _contacts.length,
+                      itemCount: _contacts.value?.length,
                       itemBuilder: (_, i) {
-                        final c = _contacts[i];
+                        final c = _contacts.value?[i];
                         return ContactTileWidget(
-                              contact: c,
-                              onTap: () =>
-                                  context.push(AppRoutes.chatWith(c.pubKey)),
+                              contact: c!,
+                              onTap: () => context.push(
+                                AppRoutes.chatWith(c.nostrPubKeyHex),
+                              ),
                             )
                             .animate()
                             .fadeIn(

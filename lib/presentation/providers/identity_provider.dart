@@ -13,9 +13,9 @@ import 'package:bip39/bip39.dart' as bip39;
 import 'package:crypto/crypto.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../crypto/key_manager.dart';
-import '../models/identity.dart';
-import '../storage/local_storage.dart';
+import '../../core/crypto/key_manager.dart';
+import '../../core/models/identity.dart';
+import '../../core/storage/local_storage.dart';
 
 /// The root identity provider. AsyncValue<IdentityState?>.
 /// null  = no account exists yet (show onboarding)

@@ -21,12 +21,13 @@ class IdentityState extends Equatable {
     required this.suiAddress,
     required this.nostrPrivKeyHex,
     required this.nostrPubKeyHex,
-    required this.npubDisplay, // bech32 npub — shown in UI
-    this.zkLoginJwt, // null for seed auth
-    this.zkLoginProof, // null for seed auth
-    this.zkLoginEphemeralKeyHex, // null for seed auth
-    this.zkLoginUserSalt, // null for seed auth
-    this.zkLoginMaxEpoch, // null for seed auth
+    required this.npubDisplay,
+    // Below will be null for seed auth
+    this.zkLoginJwt,
+    this.zkLoginProof,
+    this.zkLoginEphemeralKeyHex,
+    this.zkLoginUserSalt,
+    this.zkLoginMaxEpoch,
   });
 
   final AuthType authType;

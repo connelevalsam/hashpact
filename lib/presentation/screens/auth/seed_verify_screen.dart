@@ -15,8 +15,8 @@ import 'package:hashpact/presentation/screens/auth/widgets/word_pool_widget.dart
 import 'package:hugeicons/hugeicons.dart';
 
 import '../../../app.dart';
-import '../../../core/providers/identity_provider.dart';
 import '../../../core/util/hashpact_theme.dart';
+import '../../providers/identity_provider.dart';
 
 class SeedVerifyScreen extends ConsumerStatefulWidget {
   const SeedVerifyScreen({super.key});

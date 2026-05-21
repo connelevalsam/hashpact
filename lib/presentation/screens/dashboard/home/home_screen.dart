@@ -11,9 +11,9 @@ import 'package:hugeicons/hugeicons.dart';
 
 import '../../../../app.dart';
 import '../../../../core/models/token_info.dart';
-import '../../../../core/providers/balance_provider.dart';
-import '../../../../core/providers/identity_provider.dart';
 import '../../../../core/util/hashpact_theme.dart';
+import '../../../providers/balance_provider.dart';
+import '../../../providers/identity_provider.dart';
 import 'widgets/header.dart';
 import 'widgets/porfolio_total.dart';
 import 'widgets/secondary_token_row.dart';

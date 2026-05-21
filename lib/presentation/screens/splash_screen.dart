@@ -11,9 +11,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app.dart';
-import '../../core/providers/identity_provider.dart';
 import '../../core/storage/local_storage.dart';
 import '../../core/util/hashpact_theme.dart';
+import '../providers/identity_provider.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});

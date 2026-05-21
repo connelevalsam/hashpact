@@ -10,8 +10,8 @@ import 'package:hashpact/presentation/screens/auth/welcome_screen.dart';
 import 'package:hashpact/presentation/screens/auth/zklogin_screen.dart';
 import 'package:hashpact/presentation/screens/intro_screen.dart';
 
-import 'core/providers/identity_provider.dart';
 import 'core/util/hashpact_theme.dart';
+import 'presentation/providers/identity_provider.dart';
 import 'presentation/screens/auth/pin_lock_screen.dart';
 import 'presentation/screens/auth/pin_setup_screen.dart';
 import 'presentation/screens/auth/seed_generate_screen.dart';

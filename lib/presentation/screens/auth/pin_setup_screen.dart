@@ -12,8 +12,8 @@ import 'package:hashpact/presentation/widgets/num_pad_widget.dart';
 import 'package:hugeicons/hugeicons.dart';
 
 import '../../../app.dart';
-import '../../../core/providers/identity_provider.dart';
 import '../../../core/util/hashpact_theme.dart';
+import '../../providers/identity_provider.dart';
 
 class PinSetupScreen extends ConsumerStatefulWidget {
   const PinSetupScreen({super.key});
