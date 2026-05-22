@@ -95,36 +95,38 @@ class ContactsScreen extends ConsumerWidget {
 
             // ── List ──────────────────────────────────────────
             Expanded(
-              child: _contacts.isLoading
-                  ? CircularProgressIndicator()
-                  : _contacts.value == null
-                  ? EmptyStateWidget(
-                      onAddTap: () => _showAddContact(context, ref),
-                    )
-                  : ListView.builder(
-                      padding: AppSpacing.pagePadding,
-                      itemCount: _contacts.value?.length,
-                      itemBuilder: (_, i) {
-                        final c = _contacts.value?[i];
-                        return ContactTileWidget(
-                              contact: c!,
-                              onTap: () => context.push(
-                                AppRoutes.chatWith(c.nostrPubKeyHex),
-                              ),
-                            )
-                            .animate()
-                            .fadeIn(
-                              delay: Duration(milliseconds: 60 * i),
-                              duration: 300.ms,
-                            )
-                            .slideX(
-                              begin: 0.05,
-                              end: 0,
-                              delay: Duration(milliseconds: 60 * i),
-                              duration: 300.ms,
-                            );
-                      },
-                    ),
+              child: _contacts.when(
+                data: (contacts) => contacts.isNotEmpty
+                    ? ListView.builder(
+                        padding: AppSpacing.pagePadding,
+                        itemCount: _contacts.value?.length,
+                        itemBuilder: (_, i) {
+                          final c = _contacts.value?[i];
+                          return ContactTileWidget(
+                                contact: c!,
+                                onTap: () => context.push(
+                                  AppRoutes.chatWith(c.nostrPubKeyHex),
+                                ),
+                              )
+                              .animate()
+                              .fadeIn(
+                                delay: Duration(milliseconds: 60 * i),
+                                duration: 300.ms,
+                              )
+                              .slideX(
+                                begin: 0.05,
+                                end: 0,
+                                delay: Duration(milliseconds: 60 * i),
+                                duration: 300.ms,
+                              );
+                        },
+                      )
+                    : EmptyStateWidget(
+                        onAddTap: () => _showAddContact(context, ref),
+                      ),
+                error: (error, _) => Text(error.toString()),
+                loading: () => CircularProgressIndicator(),
+              ),
             ),
           ],
         ),
@@ -137,7 +139,7 @@ class ContactsScreen extends ConsumerWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => AddContactSheet(/*ref: ref*/),
+      builder: (_) => AddContactSheet(ref: ref),
     );
   }
 }

@@ -12,6 +12,9 @@ import 'package:hugeicons/hugeicons.dart';
 
 import '../../../../core/models/chat_message.dart';
 import '../../../../core/util/hashpact_theme.dart';
+import '../../../providers/chat_provider.dart';
+import '../../../providers/contacts_provider.dart';
+import '../../../providers/identity_provider.dart';
 import 'widgets/swap_bubble.dart';
 import 'widgets/swap_request_sheet.dart';
 
@@ -28,12 +31,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
   final _focusNode = FocusNode();
-  final List<Msg> _messages = List.from(dummyMessages);
+  final List<ChatMessage> _messages = [];
 
   String get _displayName {
-    // In real app this comes from contacts provider
-    // For now derive a name from the pubkey
-    return 'Peer ${widget.peerPubKey.substring(0, 4)}';
+    final contact = ref
+        .read(contactsProvider.notifier)
+        .findByPubKey(widget.peerPubKey);
+    return contact?.displayName ?? _truncatedKey;
   }
 
   String get _truncatedKey {
@@ -42,13 +46,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     return '${k.substring(0, 8)}...${k.substring(k.length - 8)}';
   }
 
+  bool _isMe(ChatMessage msg) {
+    final identity = ref.read(identityProvider).value;
+    if (identity == null) return false;
+    return msg.fromPubKeyHex == identity.nostrPubKeyHex;
+  }
+
   void _send() {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
-    setState(() {
-      _messages.add(Msg(text: text, isMe: true, time: DateTime.now()));
-      _controller.clear();
-    });
+    _controller.clear();
+    // _focusNode.unfocus();
+    ref.read(chatProvider(widget.peerPubKey).notifier).sendMessage(text);
+
     _scrollToBottom();
   }
 
@@ -99,6 +109,29 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         ],
       ),
     );
+  }
+
+  Widget _emptyChat({required String displayName}) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const HugeIcon(
+            icon: HugeIcons.strokeRoundedBubbleChat,
+            color: AppColors.textMuted,
+            size: 48,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text('Start a conversation', style: AppTextStyles.heading3),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            'Send a message or propose\na swap to $displayName.',
+            style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    ).animate().fadeIn(duration: 400.ms);
   }
 
   Widget _inputBar(
@@ -189,7 +222,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 
-  void _showSwapSheet(BuildContext context) {
+  void _showSwapSheet() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -203,51 +236,71 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final messages = ref.watch(chatProvider(widget.peerPubKey));
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBarWidget(
         displayName: _displayName,
         truncatedKey: _truncatedKey,
         fullKey: widget.peerPubKey,
-        onSwapTap: () {
-          // TODO: open swap request sheet
-        },
+        onSwapTap: _showSwapSheet,
       ),
       body: Column(
         children: [
           // ── Messages ────────────────────────────────────────
           Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-              itemCount: _messages.length,
-              itemBuilder: (_, i) {
-                final msg = _messages[i];
-                final showDate =
-                    i == 0 || !_sameDay(_messages[i - 1].time, msg.time);
-                return Column(
-                  children: [
-                    if (showDate) _dateDivider(msg.time),
-                    if (msg.isSwap)
-                      SwapBubble(
-                        isMe: msg.isMe,
-                        time: msg.time,
-                      ).animate().fadeIn(duration: 200.ms)
-                    else
-                      BubbleWidget(msg: msg)
-                          .animate()
-                          .fadeIn(duration: 200.ms)
-                          .slideY(begin: 0.04, end: 0, duration: 200.ms),
-                  ],
-                );
-              },
+            child: messages.when(
+              data: (data) => data.isEmpty
+                  ? _emptyChat(displayName: _displayName)
+                  : ListView.builder(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                      itemCount: data.length,
+                      itemBuilder: (_, i) {
+                        final msg = data[i];
+                        final isMe = _isMe(msg);
+                        final showDate =
+                            i == 0 ||
+                            !_sameDay(data[i - 1].createdAt, msg.createdAt);
+                        return Column(
+                          children: [
+                            if (showDate) _dateDivider(msg.createdAt),
+                            if (msg.isSwap)
+                              SwapBubble(
+                                isMe: isMe,
+                                time: msg.createdAt,
+                              ).animate().fadeIn(duration: 200.ms)
+                            else
+                              BubbleWidget(msg: msg, isMe: isMe)
+                                  .animate()
+                                  .fadeIn(duration: 200.ms)
+                                  .slideY(
+                                    begin: 0.04,
+                                    end: 0,
+                                    duration: 200.ms,
+                                  ),
+                          ],
+                        );
+                      },
+                    ),
+              error: (error, _) => Center(
+                child: Text(
+                  'Could not load messages',
+                  style: AppTextStyles.body.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+              loading: () => Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
+              ),
             ),
           ),
 
           // ── Input bar ───────────────────────────────────────
           _inputBar(_controller, _focusNode, _send, () {
             // TODO: open swap request sheet
-            _showSwapSheet(context);
+            _showSwapSheet();
           }),
         ],
       ),

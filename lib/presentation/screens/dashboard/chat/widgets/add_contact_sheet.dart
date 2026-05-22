@@ -4,15 +4,17 @@
 */
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 
 import '../../../../../core/util/hashpact_theme.dart';
+import '../../../../providers/contacts_provider.dart';
 
 class AddContactSheet extends StatefulWidget {
-  const AddContactSheet({super.key /*required this.ref*/});
+  const AddContactSheet({super.key, required this.ref});
 
-  // final WidgetRef ref;
+  final WidgetRef ref;
 
   @override
   State<AddContactSheet> createState() => _AddContactSheetState();
@@ -36,9 +38,9 @@ class _AddContactSheetState extends State<AddContactSheet> {
 
     setState(() => _loading = true);
 
-    /*await widget.ref
+    await widget.ref
         .read(contactsProvider.notifier)
-        .addContact(_keyController.text.trim(), _nameController.text.trim());*/
+        .addContact(_keyController.text.trim(), _nameController.text.trim());
 
     if (mounted) Navigator.pop(context);
   }
@@ -122,9 +124,10 @@ class _AddContactSheetState extends State<AddContactSheet> {
               const SizedBox(height: AppSpacing.xl),
 
               FilledButton(
-                onPressed: () {
+                onPressed: () async {
                   if (_formKey.currentState!.validate()) {
-                    context.pop();
+                    await _save();
+                    if (context.mounted) context.pop();
                   }
                 },
                 // _loading ? null : _save,

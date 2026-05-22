@@ -9,20 +9,21 @@ import '../../../../../core/models/chat_message.dart';
 import '../../../../../core/util/hashpact_theme.dart';
 
 class BubbleWidget extends StatelessWidget {
-  const BubbleWidget({super.key, required this.msg});
+  const BubbleWidget({super.key, required this.msg, required this.isMe});
 
-  final Msg msg;
+  final ChatMessage msg;
+  final bool isMe;
 
   String get _time {
-    final h = msg.time.hour.toString().padLeft(2, '0');
-    final m = msg.time.minute.toString().padLeft(2, '0');
+    final h = msg.createdAt.hour.toString().padLeft(2, '0');
+    final m = msg.createdAt.minute.toString().padLeft(2, '0');
     return '$h:$m';
   }
 
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: msg.isMe ? Alignment.centerRight : Alignment.centerLeft,
+      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.only(bottom: AppSpacing.sm),
         constraints: BoxConstraints(
@@ -33,25 +34,25 @@ class BubbleWidget extends StatelessWidget {
           vertical: AppSpacing.sm,
         ),
         decoration: BoxDecoration(
-          color: msg.isMe ? AppColors.primaryDim : AppColors.surface,
+          color: isMe ? AppColors.primaryDim : AppColors.surface,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
             topRight: const Radius.circular(16),
-            bottomLeft: Radius.circular(msg.isMe ? 16 : 4),
-            bottomRight: Radius.circular(msg.isMe ? 4 : 16),
+            bottomLeft: Radius.circular(isMe ? 16 : 4),
+            bottomRight: Radius.circular(isMe ? 4 : 16),
           ),
           border: Border.all(
-            color: msg.isMe
+            color: isMe
                 ? AppColors.primary.withValues(alpha: 0.3)
                 : AppColors.border,
           ),
         ),
         child: Column(
-          crossAxisAlignment: msg.isMe
+          crossAxisAlignment: isMe
               ? CrossAxisAlignment.end
               : CrossAxisAlignment.start,
           children: [
-            Text(msg.text, style: AppTextStyles.body),
+            Text(msg.content, style: AppTextStyles.body),
             const SizedBox(height: 4),
             Text(
               _time,
