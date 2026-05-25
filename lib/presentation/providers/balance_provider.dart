@@ -9,6 +9,8 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/models/token_info.dart';
+import '../../core/services/sui_service.dart';
 import 'identity_provider.dart';
 
 // ── Privacy mode ──────────────────────────────────────────────
@@ -42,33 +44,27 @@ class BalanceNotifier extends AsyncNotifier<Map<String, BigInt>> {
 
   Future<Map<String, BigInt>> _fetchAll() async {
     final identity = ref.read(identityProvider).value;
-    if (identity == null) return {};
+    if (identity == null ||
+        identity.suiAddress == 'pending' ||
+        identity.suiAddress == '')
+      return {};
 
+    final sui = SuiService(useTestnet: true);
     final results = <String, BigInt>{};
 
-    /*try {
-      final suiService = SuiService(useTestnet: true);
-      final suiBalances = await suiService.getAllBalances(identity.suiAddress);
-      results.addAll(suiBalances);
-    } catch (_) {
-      for (final t in TokenRegistry.suiTokens) {
-        results[t.id] = BigInt.zero;
-      }
+    results['SUI'] = await sui.getSuiBalance(identity.suiAddress);
+
+    for (final token in TokenRegistry.suiTokens) {
+      if (token.id == 'SUI') continue;
+      if (token.testnetCoinType == null) continue;
+      results[token.id] = await sui.getCoinBalance(
+        identity.suiAddress,
+        token.testnetCoinType!,
+      );
     }
 
-    try {
-      final btcService = BtcService(useTestnet: true);
-      final btcBalance = await btcService.getBalance(_btcAddress(identity));
-      results['BTC'] = btcBalance.confirmedSats;
-    } catch (_) {
-      results['BTC'] = BigInt.zero;
-    }*/
+    results['BTC'] = BigInt.zero;
 
     return results;
-  }
-
-  String _btcAddress(identity) {
-    // Placeholder until BIP84 derivation is wired
-    return 'tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx';
   }
 }

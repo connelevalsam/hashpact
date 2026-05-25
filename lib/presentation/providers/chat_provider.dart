@@ -10,8 +10,10 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hashpact/core/models/chat_message.dart';
+import 'package:hashpact/presentation/providers/swap_provider.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../core/services/nostr_dm_service.dart';
 import '../../core/storage/local_storage.dart';
 import '../../core/util/app_constant.dart';
 import 'contacts_provider.dart';
@@ -27,6 +29,38 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
 
   @override
   FutureOr<List<ChatMessage>> build() {
+    final nostrListener = ref.watch(nostrServiceProvider);
+    if (nostrListener != null) {
+      final sub = nostrListener.dmStream.listen((dm) {
+        if (dm.fromPubKeyHex == currentUserId ||
+            dm.toPubKeyHex == currentUserId) {
+          final payload = dm.parsedPayload;
+
+          if (payload != null) {
+            // ROUTE TO SWAP ENGINE
+            final engine = ref.read(swapEngineProvider);
+          }
+
+          final msg = ChatMessage(
+            id: dm.eventId,
+            fromPubKeyHex: dm.fromPubKeyHex,
+            toPubKeyHex: dm.toPubKeyHex,
+            type: dm.parsedPayload != null
+                ? (dm.parsedPayload!['type'] == AppConstants.nostrMsgOffer
+                      ? MessageType.swapOffer
+                      : MessageType.swapStatus)
+                : MessageType.text,
+            content: dm.decryptedContent,
+            createdAt: dm.createdAt,
+          );
+
+          appendIncoming(msg);
+        }
+      });
+
+      ref.onDispose(sub.cancel);
+    }
+
     return _load();
   }
 
@@ -61,6 +95,9 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
     await ref
         .read(contactsProvider.notifier)
         .updateLastMessage(currentUserId, text);
+
+    final nostr = ref.read(nostrServiceProvider);
+    await nostr?.sendText(currentUserId, text);
   }
 
   // ========= APPEND =========
@@ -87,6 +124,24 @@ class ChatNotifier extends AsyncNotifier<List<ChatMessage>> {
         .read(contactsProvider.notifier)
         .updateLastMessage(currentUserId, message.content);
   }
+
+  // ========== NOSTR SERVICE PROVIDER ==========
+  final nostrServiceProvider = Provider<NostrDMService?>((ref) {
+    final identity = ref.watch(identityProvider).value;
+    if (identity == null) return null;
+    if (identity.nostrPrivKeyHex == 'pending') return null;
+
+    final service = NostrDMService(
+      myPrivKeyHex: identity.nostrPrivKeyHex,
+      myPubKeyHex: identity.nostrPubKeyHex,
+    );
+
+    // Connect when created, disconnect when disposed
+    service.connect();
+    ref.onDispose(service.dispose);
+
+    return service;
+  });
 
   // ========= PERSIST =========
   Future<void> _persist(List<ChatMessage> msg) => PrefStore.instance.setString(

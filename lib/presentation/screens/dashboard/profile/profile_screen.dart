@@ -11,25 +11,21 @@ import 'package:hugeicons/hugeicons.dart';
 
 import '../../../../app.dart';
 import '../../../../core/util/hashpact_theme.dart';
+import '../../../providers/balance_provider.dart';
+import '../../../providers/identity_provider.dart';
 import 'widgets/identity_card.dart';
 import 'widgets/settings_tile.dart';
 
-class ProfileScreen extends ConsumerStatefulWidget {
+class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
-  ConsumerState createState() => _ProfileScreenState();
-}
-
-const _dummyNpub = 'npub1a1b2c3d4e5f...8f9a0b';
-const _dummySuiAddress = '0x1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b';
-const _dummyAuthType = 'Seed phrase';
-
-class _ProfileScreenState extends ConsumerState<ProfileScreen> {
-  bool _privacyMode = false;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final identity = ref.watch(identityProvider).value;
+    final npub = identity?.npubDisplay ?? '—';
+    final suiAddress = identity?.suiAddress ?? '—';
+    final authType = identity?.isSeed == true ? 'Seed phrase' : 'zkLogin';
+    var _privacyMode = ref.watch(privacyModeProvider);
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -63,9 +59,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               child: Padding(
                 padding: AppSpacing.pagePadding,
                 child: IdentityCard(
-                  dummyNpub: _dummyNpub,
-                  dummySuiAddress: _dummySuiAddress,
-                  dummyAuthType: _dummyAuthType,
+                  npub: npub,
+                  suiAddress: suiAddress,
+                  authType: authType,
                 ),
               ).animate().fadeIn(delay: 100.ms, duration: 400.ms),
             ),
@@ -109,7 +105,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       label: 'Privacy mode',
                       trailing: Switch(
                         value: _privacyMode,
-                        onChanged: (v) => setState(() => _privacyMode = v),
+                        onChanged: (v) {
+                          ref.read(privacyModeProvider.notifier).toggle();
+                        },
                         activeThumbColor: AppColors.primary,
                       ),
                     ),

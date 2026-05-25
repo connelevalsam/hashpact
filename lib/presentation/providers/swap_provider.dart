@@ -20,9 +20,7 @@ final swapProvider = AsyncNotifierProvider<SwapNotifier, List<SwapOffer>>(
 
 class SwapNotifier extends AsyncNotifier<List<SwapOffer>> {
   @override
-  FutureOr<List<SwapOffer>> build() {
-    return _load();
-  }
+  FutureOr<List<SwapOffer>> build() => _load();
 
   // ========= LOAD =========
   Future<List<SwapOffer>> _load() async {
@@ -30,7 +28,7 @@ class SwapNotifier extends AsyncNotifier<List<SwapOffer>> {
     if (raw == null) return [];
     final list = jsonDecode(raw) as List;
     return list
-        .map((e) => SwapOffer.fromJson(e as Map<String, dynamic>))
+        .map((data) => SwapOffer.fromJson(data as Map<String, dynamic>))
         .toList();
   }
 
@@ -39,9 +37,9 @@ class SwapNotifier extends AsyncNotifier<List<SwapOffer>> {
     final current = state.value ?? [];
 
     // Replace if exists, add if new
-    final exists = current.any((s) => s.id == swap.id);
+    final exists = current.any((data) => data.id == swap.id);
     final updated = exists
-        ? current.map((s) => s.id == swap.id ? swap : s).toList()
+        ? current.map((data) => data.id == swap.id ? swap : data).toList()
         : [...current, swap];
 
     state = AsyncData(updated);

@@ -12,14 +12,14 @@ import '../../../../../core/util/hashpact_theme.dart';
 class IdentityCard extends StatelessWidget {
   const IdentityCard({
     super.key,
-    required this.dummyNpub,
-    required this.dummySuiAddress,
-    required this.dummyAuthType,
+    required this.npub,
+    required this.suiAddress,
+    required this.authType,
   });
 
-  final String dummyNpub;
-  final String dummySuiAddress;
-  final String dummyAuthType;
+  final String npub;
+  final String suiAddress;
+  final String authType;
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +69,7 @@ class IdentityCard extends StatelessWidget {
               ),
             ),
             child: Text(
-              dummyAuthType,
+              authType,
               style: AppTextStyles.label.copyWith(
                 color: AppColors.primary,
                 fontSize: 10,
@@ -85,7 +85,7 @@ class IdentityCard extends StatelessWidget {
           _keyRow(
             context: context,
             label: 'Nostr public key',
-            value: dummyNpub,
+            value: npub,
             icon: HugeIcons.strokeRoundedKey01,
           ),
 
@@ -95,7 +95,7 @@ class IdentityCard extends StatelessWidget {
           _keyRow(
             context: context,
             label: 'SUI address',
-            value: dummySuiAddress,
+            value: suiAddress,
             icon: HugeIcons.strokeRoundedWallet01,
           ),
         ],

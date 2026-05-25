@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hashpact/core/models/contact.dart';
 import 'package:hashpact/presentation/screens/dashboard/chat/widgets/add_contact_sheet.dart';
 import 'package:hashpact/presentation/screens/dashboard/chat/widgets/contact_tile_widget.dart';
 import 'package:hashpact/presentation/screens/dashboard/chat/widgets/empty_state_widget.dart';
@@ -16,16 +17,27 @@ import '../../../../app.dart';
 import '../../../../core/util/hashpact_theme.dart';
 import '../../../providers/contacts_provider.dart';
 
-class ContactsScreen extends ConsumerWidget {
+class ContactsScreen extends ConsumerStatefulWidget {
   const ContactsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ContactsScreenState createState() => ContactsScreenState();
+}
+
+class ContactsScreenState extends ConsumerState<ContactsScreen> {
+  final _txtSearchController = TextEditingController();
+
+  List<Contact> get _filtered {
+    final contacts = ref.watch(contactsProvider).value ?? [];
+    final _search = _txtSearchController.text.trim();
+    return contacts.where((contact) {
+      return contact.displayName.toLowerCase().contains(_search.toLowerCase());
+    }).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final _contacts = ref.watch(contactsProvider);
-    String _search = '';
-    /*List<DummyContact> _contacts = dummyContacts.where((contact) {
-      return contact.name.toLowerCase().contains(_search.toLowerCase());
-    }).toList();*/
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -84,10 +96,7 @@ class ContactsScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                onChanged: (val) {
-                  // TODO: filter contacts list
-                  _search = val;
-                },
+                onChanged: (val) => _filtered,
               ),
             ).animate().fadeIn(delay: 100.ms, duration: 400.ms),
 
